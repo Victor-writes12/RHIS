@@ -216,3 +216,64 @@ document.querySelectorAll('.g-item').forEach((item, index) => {
     item.addEventListener('click', () => openLB(entry.index, entry.caption));
   }
 });
+
+/* ── ANNOUNCEMENT BANNER ── */
+(function () {
+  const anns = JSON.parse(localStorage.getItem('rhis_announcements') || '[]');
+  const now = new Date();
+  const active = anns.filter(a => a.priority && new Date(a.expiry) > now);
+  const order = { urgent: 0, important: 1, normal: 2 };
+  active.sort((a, b) => (order[a.priority] || 2) - (order[b.priority] || 2));
+  const top = active[0];
+  if (top) {
+    const banner = document.getElementById('ann-banner');
+    const text = document.getElementById('ann-banner-text');
+    const icons = {
+      urgent: 'fa-circle-exclamation',
+      important: 'fa-triangle-exclamation',
+      normal: 'fa-circle-info'
+    };
+    banner.className = top.priority;
+    text.innerHTML = '<i class="fa-solid ' + (icons[top.priority]) + '"></i>'
+      + '<strong>' + top.title + ':</strong> ' + top.body;
+    banner.style.display = 'block';
+  }
+})();
+
+function closeBanner() {
+  const b = document.getElementById('ann-banner');
+  b.style.opacity = '0';
+  setTimeout(() => b.style.display = 'none', 300);
+}
+
+/* ── NEWS SECTION ── */
+(function () {
+  const posts = JSON.parse(localStorage.getItem('rhis_posts') || '[]');
+  const published = posts.filter(p => p.status === 'published').slice(0, 3);
+  const grid = document.getElementById('news-grid');
+  if (!grid || published.length === 0) return;
+
+  function formatDate(str) {
+    if (!str) return '';
+    return new Date(str).toLocaleDateString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+  }
+
+  grid.innerHTML = published.map(p => `
+    <div class="news-card">
+      <div class="news-card-img">
+        ${p.image
+          ? `<img src="${p.image}" alt="${p.title}"/>`
+          : '<i class="fa-solid fa-newspaper no-img"></i>'}
+        <span class="news-cat">${p.category}</span>
+      </div>
+      <div class="news-card-body">
+        <div class="news-date">
+          <i class="fa-regular fa-calendar"></i> ${formatDate(p.date)}
+        </div>
+        <h3>${p.title}</h3>
+        <p>${p.excerpt || ''}</p>
+      </div>
+    </div>`).join('');
+})();
