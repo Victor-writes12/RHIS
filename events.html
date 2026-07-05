@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Events & Activities | Royal Heritage International School</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@300;400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- LIGHTBOX -->
+<div class="lb" id="lb" role="dialog" aria-modal="true">
+  <button class="lb-x" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+  <button class="lb-btn lb-prev" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+  <img id="lb-img" src="" alt=""/>
+  <div class="lb-cap" id="lb-cap"></div>
+  <button class="lb-btn lb-next" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="index.html#home" class="logo">
+    <img src="logo.png" alt="Royal Heritage Crest"/>
+    <div>
+      <span class="nm">Royal Heritage</span>
+      <span class="sb">International School</span>
+    </div>
+  </a>
+  <ul class="nav-links" id="navul">
+    <li><a href="index.html#home">Home</a></li>
+    <li class="dropdown">
+      <button type="button" class="drop-toggle">About</button>
+      <ul class="dropdown-menu">
+        <li><a href="index.html#about">Our Story</a></li>
+        <li><a href="index.html#mission">Vision &amp; Values</a></li>
+        <li><a href="index.html#awards">Achievements</a></li>
+      </ul>
+    </li>
+    <li class="dropdown">
+      <button type="button" class="drop-toggle">Activities</button>
+      <ul class="dropdown-menu">
+        <li><a href="index.html#sports">Sports</a></li>
+        <li><a href="index.html#clubs">Clubs</a></li>
+        <li><a href="events.html">Events</a></li>
+      </ul>
+    </li>
+    <li class="dropdown">
+      <button type="button" class="drop-toggle">Admissions</button>
+      <ul class="dropdown-menu">
+        <li><a href="index.html#apply">Apply</a></li>
+        <li><a href="index.html#fees">Fees</a></li>
+        <li><a href="index.html#visit">Visit Us</a></li>
+      </ul>
+    </li>
+    <li class="dropdown">
+      <button type="button" class="drop-toggle">Picture Gallery</button>
+      <ul class="dropdown-menu">
+        <li><a href="index.html#gallery">Campus</a></li>
+        <li><a href="events.html">Events</a></li>
+      </ul>
+    </li>
+    <li><a href="founders.html">Our Leadership</a></li>
+    <li><a href="index.html#contact">Contact Us</a></li>
+    <li class="nav-search-mobile">
+      <form>
+        <input type="search" placeholder="Search the school..." aria-label="Search"/>
+        <button type="submit">Go</button>
+      </form>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <div class="nav-search">
+      <form>
+        <input type="search" placeholder="Search the school..." aria-label="Search"/>
+        <button type="submit">Go</button>
+      </form>
+    </div>
+    <a href="index.html#contact" class="nav-cta">Visit School</a>
+  </div>
+  <button class="ham" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- EVENTS PAGE HEADER -->
+<section id="ev-hero">
+  <p class="eyebrow reveal ev-eyebrow">Life at Royal Heritage</p>
+  <h1 class="ev-title reveal">Events &amp; Activities</h1>
+  <p class="ev-sub reveal">Debates, hangouts, excursions and cultural celebrations — a look at the moments that make Royal Heritage more than just a classroom.</p>
+</section>
+
+<!-- EVENT HIGHLIGHT SLIDERS -->
+<section id="ev-highlights">
+  <div class="ev-grid">
+
+    <div class="ev-card reveal d1">
+      <div class="ev-slider" data-interval="2000">
+        <img class="ev-slide active" src="debate1.jpg" alt="Debate Club"/>
+        <img class="ev-slide" src="debate2.jpg" alt="Debate Club"/>
+        <img class="ev-slide" src="debate3.jpg" alt="Debate Club"/>
+      </div>
+      <h3>Debate &amp; Literary Society</h3>
+      <p>Students sharpen their voice and reasoning, going head-to-head on topics that matter.</p>
+    </div>
+
+    <div class="ev-card reveal d2">
+      <div class="ev-slider" data-interval="2000">
+        <img class="ev-slide active" src="Cam1.jpg" alt="Student Hangout"/>
+        <img class="ev-slide" src="cam2.jpg" alt="Student Hangout"/>
+        <img class="ev-slide" src="cam3.jpg" alt="Student Hangout"/>
+        <img class="ev-slide" src="cam4.jpg" alt="Student Hangout"/>
+        <img class="ev-slide" src="cam5.jpg" alt="Student Hangout"/>
+      </div>
+      <h3>Student Hangouts</h3>
+      <p>Downtime and friendship outside the classroom, building the bonds that last beyond school.</p>
+    </div>
+
+    <div class="ev-card reveal d3">
+      <div class="ev-slider" data-interval="2000">
+        <img class="ev-slide active" src="cultural1.jpg" alt="Cultural Day"/>
+        <img class="ev-slide" src="cultural2.jpg" alt="Cultural Day"/>
+        <img class="ev-slide" src="cultural3.jpg" alt="Cultural Day"/>
+        <img class="ev-slide" src="cultural4.jpg" alt="Cultural Day"/>
+      </div>
+      <h3>Cultural Day</h3>
+      <p>A vibrant celebration of Nigeria's rich heritage, in colourful attire and shared pride.</p>
+    </div>
+
+    <div class="ev-card reveal d4">
+      <div class="ev-slider" data-interval="2000">
+        <img class="ev-slide active" src="explore1.jpg" alt="School Excursion"/>
+        <img class="ev-slide" src="explore2.jpg" alt="School Excursion"/>
+        <img class="ev-slide" src="explore3.jpg" alt="School Excursion"/>
+        <img class="ev-slide" src="Explore4.jpg" alt="School Excursion"/>
+        <img class="ev-slide" src="explore5.jpg" alt="School Excursion"/>
+        <img class="ev-slide" src="explore6.jpg" alt="School Excursion"/>
+      </div>
+      <h3>Excursions</h3>
+      <p>Learning beyond the walls — field trips that turn textbook lessons into real memories.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- FULL EVENTS GALLERY -->
+<section id="ev-gallery">
+  <p class="eyebrow reveal eyebrow-gold-lt">More Moments</p>
+  <h2 class="sec-title reveal d1 sec-title-light">Full Gallery</h2>
+  <p class="sec-body reveal d2 copy-center-gallery">Every picture from our debates, hangouts, cultural day and excursions in one place. Click any image to view.</p>
+
+  <div class="gallery-grid" id="ev-gg">
+    <div class="g-item"><img src="explore1.jpg" alt="School Excursion"/><div class="g-ov"><span>Excursion</span></div></div>
+    <div class="g-item"><img src="debate1.jpg" alt="Debate Club"/><div class="g-ov"><span>Debate</span></div></div>
+    <div class="g-item"><img src="Cam1.jpg" alt="Student Hangout"/><div class="g-ov"><span>Hangout</span></div></div>
+    <div class="g-item"><img src="explore2.jpg" alt="School Excursion"/><div class="g-ov"><span>Excursion</span></div></div>
+    <div class="g-item"><img src="cultural1.jpg" alt="Cultural Day"/><div class="g-ov"><span>Cultural Day</span></div></div>
+    <div class="g-item"><img src="debate2.jpg" alt="Debate Club"/><div class="g-ov"><span>Debate</span></div></div>
+    <div class="g-item"><img src="cultural2.jpg" alt="Cultural Day"/><div class="g-ov"><span>Cultural Day</span></div></div>
+    <div class="g-item"><img src="explore3.jpg" alt="School Excursion"/><div class="g-ov"><span>Excursion</span></div></div>
+    <div class="g-item"><img src="debate3.jpg" alt="Debate Club"/><div class="g-ov"><span>Debate</span></div></div>
+    <div class="g-item"><img src="cam3.jpg" alt="Student Hangout"/><div class="g-ov"><span>Hangout</span></div></div>
+    <div class="g-item"><img src="cultural3.jpg" alt="Cultural Day"/><div class="g-ov"><span>Cultural Day</span></div></div>
+    <div class="g-item"><img src="Explore4.jpg" alt="School Excursion"/><div class="g-ov"><span>Excursion</span></div></div>
+    <div class="g-item"><img src="cam4.jpg" alt="Student Hangout"/><div class="g-ov"><span>Hangout</span></div></div>
+    <div class="g-item"><img src="cultural4.jpg" alt="Cultural Day"/><div class="g-ov"><span>Cultural Day</span></div></div>
+    <div class="g-item"><img src="explore5.jpg" alt="School Excursion"/><div class="g-ov"><span>Excursion</span></div></div>
+    <div class="g-item"><img src="explore6.jpg" alt="School Excursion"/><div class="g-ov"><span>Excursion</span></div></div>
+    <div class="g-item"><img src="cam2.jpg" alt="Student Hangout"/><div class="g-ov"><span>Hangout</span></div></div>
+    <div class="g-item"><img src="cam5.jpg" alt="Student Hangout"/><div class="g-ov"><span>Hangout</span></div></div>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2026 <strong>Royal Heritage International School</strong> &nbsp;|&nbsp; Passion for Excellence &nbsp;|&nbsp; Osun State, Nigeria</p>
+  <p style="margin-top:10px;">
+  <a href="admin.html"
+     style="color:rgba(255,255,255,.25);font-size:11px;text-decoration:none;letter-spacing:.5px;"
+     onmouseover="this.style.color='rgba(255,255,255,.6)'"
+     onmouseout="this.style.color='rgba(255,255,255,.25)'">
+    <i class="fa-solid fa-lock" style="margin-right:4px;"></i>Admin Login
+  </a>
+</p>
+</footer>
+
+<script src="events.js" defer></script>
+</body>
+</html>
