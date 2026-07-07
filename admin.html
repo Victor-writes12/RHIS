@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <link rel="stylesheet" href="admin.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -19,9 +20,9 @@
     <div class="login-err" id="login-err"></div>
     <form id="login-form">
       <div class="login-field">
-        <label for="login-user">Username</label>
+        <label for="login-user">Email</label>
         <i class="fa-solid fa-user icon"></i>
-        <input type="text" id="login-user" placeholder="Enter username" autocomplete="username" required/>
+        <input type="email" id="login-user" placeholder="Enter admin email" autocomplete="username" required/>
       </div>
       <div class="login-field">
         <label for="login-pass">Password</label>
@@ -30,7 +31,55 @@
       </div>
       <button type="submit" class="btn-login"><i class="fa-solid fa-right-to-bracket"></i> &nbsp;Sign In</button>
     </form>
+    <p style="text-align:center;margin-top:14px;">
+      <a href="#" id="forgot-pass-link" style="font-size:13px;color:#8a8f98;text-decoration:underline;">Forgot password?</a>
+    </p>
     <p class="login-badge"><i class="fa-solid fa-shield-halved"></i> Secured Admin Portal</p>
+  </div>
+</div>
+
+<!-- ══ FORGOT PASSWORD OVERLAY ══ -->
+<div id="forgot-overlay" class="hidden" style="position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);">
+  <div class="login-card">
+    <img src="logo.png" alt="RHIS Logo" class="login-logo"/>
+    <h2>Reset Password</h2>
+    <p class="sub">Enter your admin email and we'll send you a reset link.</p>
+    <div class="login-err" id="forgot-err"></div>
+    <div class="login-err" id="forgot-success" style="display:none;color:#2e7d32;"></div>
+    <form id="forgot-form">
+      <div class="login-field">
+        <label for="forgot-email">Email</label>
+        <i class="fa-solid fa-envelope icon"></i>
+        <input type="email" id="forgot-email" placeholder="Enter admin email" autocomplete="email" required/>
+      </div>
+      <button type="submit" class="btn-login"><i class="fa-solid fa-paper-plane"></i> &nbsp;Send Reset Link</button>
+    </form>
+    <p style="text-align:center;margin-top:14px;">
+      <a href="#" id="back-to-login-link" style="font-size:13px;color:#8a8f98;text-decoration:underline;">Back to sign in</a>
+    </p>
+  </div>
+</div>
+
+<!-- ══ SET NEW PASSWORD OVERLAY (shown after clicking email reset link) ══ -->
+<div id="reset-overlay" class="hidden" style="position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);">
+  <div class="login-card">
+    <img src="logo.png" alt="RHIS Logo" class="login-logo"/>
+    <h2>Set New Password</h2>
+    <p class="sub">Choose a new password for your admin account.</p>
+    <div class="login-err" id="reset-err"></div>
+    <form id="reset-form">
+      <div class="login-field">
+        <label for="reset-pass-new">New Password</label>
+        <i class="fa-solid fa-lock icon"></i>
+        <input type="password" id="reset-pass-new" placeholder="At least 8 characters" autocomplete="new-password" required minlength="8"/>
+      </div>
+      <div class="login-field">
+        <label for="reset-pass-confirm">Confirm Password</label>
+        <i class="fa-solid fa-lock icon"></i>
+        <input type="password" id="reset-pass-confirm" placeholder="Re-enter new password" autocomplete="new-password" required minlength="8"/>
+      </div>
+      <button type="submit" class="btn-login"><i class="fa-solid fa-check"></i> &nbsp;Update Password</button>
+    </form>
   </div>
 </div>
 
@@ -66,7 +115,7 @@
         <li><a href="#" data-section="overview" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard Overview</a></li>
         <li><a href="#" data-section="posts"><i class="fa-solid fa-newspaper"></i> News &amp; Posts</a></li>
         <li><a href="#" data-section="announcements"><i class="fa-solid fa-bullhorn"></i> Announcements</a></li>
-        <li><a href="#" data-section="gallery"><i class="fa-regular fa-image"></i> Manage Gallery</a></li>
+        <li><a href="#" data-section="gallery"><i class="fa-solid fa-images"></i> Manage Gallery</a></li>
         <li><a href="#" data-section="settings"><i class="fa-solid fa-gear"></i> Site Settings</a></li>
       </ul>
       <div class="sidebar-footer">
@@ -354,12 +403,6 @@
 
         <div class="settings-card">
           <h3><i class="fa-solid fa-key"></i> Change Admin Password</h3>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pass-current">Current Password</label>
-              <input type="password" id="pass-current" placeholder="Enter current password"/>
-            </div>
-          </div>
           <div class="form-row">
             <div class="form-group">
               <label for="pass-new">New Password</label>

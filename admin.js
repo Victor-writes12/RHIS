@@ -3,7 +3,10 @@
    ═══════════════════════════════════════════════ */
 
 /* ── CONSTANTS ── */
-const CREDENTIALS = { user: 'rhis-admin', pass: 'RoyalHeritage2026' };
+const SUPABASE_URL = 'https://kpzpwjslhlkhqsllaals.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_9Pid0rmZu6k2WaMxdlfRCA_fYzo8vFr';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const KEYS = {
   posts: 'rhis_posts',
   announcements: 'rhis_announcements',
@@ -39,46 +42,126 @@ function timeAgo(iso) {
 /* ══════════════════════════════
    LOGIN
 ══════════════════════════════ */
-function initLogin() {
-  // Check existing session
-  if (sessionStorage.getItem(KEYS.session) === 'ok') {
+async function initLogin() {
+
+  /* If this page was opened from a password-reset email link, Supabase
+     puts the recovery info in the URL and fires a PASSWORD_RECOVERY event. */
+  supabaseClient.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      document.getElementById('login-overlay').classList.add('hidden');
+      document.getElementById('reset-overlay').classList.remove('hidden');
+    }
+  });
+
+  /* Check existing session */
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) {
     showDashboard();
     return;
   }
 
-  document.getElementById('login-form').addEventListener('submit', function (e) {
+  document.getElementById('login-form').addEventListener('submit', async function (e) {
     e.preventDefault();
-    const u = document.getElementById('login-user').value.trim();
-    const p = document.getElementById('login-pass').value;
+    const email = document.getElementById('login-user').value.trim();
+    const pass = document.getElementById('login-pass').value;
     const err = document.getElementById('login-err');
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalBtnHTML = btn.innerHTML;
 
-    // Check if password was changed in settings
-    const settings = getObj(KEYS.settings);
-    const storedPass = settings.adminPass || CREDENTIALS.pass;
-    const storedUser = CREDENTIALS.user;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> &nbsp;Signing in...';
 
-    if (u === storedUser && p === storedPass) {
-      sessionStorage.setItem(KEYS.session, 'ok');
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHTML;
+
+    if (!error) {
       err.classList.remove('show');
       showDashboard();
     } else {
-      err.textContent = 'Invalid username or password. Please try again.';
+      err.textContent = 'Invalid email or password. Please try again.';
       err.classList.add('show');
       document.getElementById('login-pass').value = '';
+    }
+  });
+
+  /* Forgot password link */
+  document.getElementById('forgot-pass-link').addEventListener('click', function (e) {
+    e.preventDefault();
+    document.getElementById('login-overlay').classList.add('hidden');
+    document.getElementById('forgot-overlay').classList.remove('hidden');
+  });
+
+  document.getElementById('back-to-login-link').addEventListener('click', function (e) {
+    e.preventDefault();
+    document.getElementById('forgot-overlay').classList.add('hidden');
+    document.getElementById('login-overlay').classList.remove('hidden');
+  });
+
+  document.getElementById('forgot-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const email = document.getElementById('forgot-email').value.trim();
+    const err = document.getElementById('forgot-err');
+    const successMsg = document.getElementById('forgot-success');
+
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.href.split('#')[0].split('?')[0]
+    });
+
+    if (error) {
+      err.textContent = 'Something went wrong. Please try again.';
+      err.classList.add('show');
+      successMsg.style.display = 'none';
+    } else {
+      err.classList.remove('show');
+      successMsg.textContent = 'Reset link sent! Check your email inbox.';
+      successMsg.style.display = 'block';
+    }
+  });
+
+  /* Set new password (after clicking the emailed reset link) */
+  document.getElementById('reset-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const newPass = document.getElementById('reset-pass-new').value;
+    const confirmPass = document.getElementById('reset-pass-confirm').value;
+    const err = document.getElementById('reset-err');
+
+    if (newPass.length < 8) {
+      err.textContent = 'Password must be at least 8 characters.';
+      err.classList.add('show');
+      return;
+    }
+    if (newPass !== confirmPass) {
+      err.textContent = 'Passwords do not match.';
+      err.classList.add('show');
+      return;
+    }
+
+    const { error } = await supabaseClient.auth.updateUser({ password: newPass });
+
+    if (error) {
+      err.textContent = 'Could not update password. Please try the reset link again.';
+      err.classList.add('show');
+    } else {
+      document.getElementById('reset-overlay').classList.add('hidden');
+      showDashboard();
     }
   });
 }
 
 function showDashboard() {
   document.getElementById('login-overlay').classList.add('hidden');
+  document.getElementById('forgot-overlay').classList.add('hidden');
+  document.getElementById('reset-overlay').classList.add('hidden');
   const dash = document.getElementById('dashboard');
   dash.classList.add('visible');
   initDashboard();
 }
 
-function logout() {
+async function logout() {
   if (!confirm('Are you sure you want to log out?')) return;
-  sessionStorage.removeItem(KEYS.session);
+  await supabaseClient.auth.signOut();
   document.getElementById('login-overlay').classList.remove('hidden');
   document.getElementById('dashboard').classList.remove('visible');
   document.getElementById('login-user').value = '';
@@ -518,22 +601,22 @@ function saveSettings() {
   showToast('Settings saved successfully!', 'success');
 }
 
-function changePassword() {
-  const current  = document.getElementById('pass-current').value;
+async function changePassword() {
   const newPass  = document.getElementById('pass-new').value;
   const confirm  = document.getElementById('pass-confirm').value;
-  const s = getObj(KEYS.settings);
-  const storedPass = s.adminPass || CREDENTIALS.pass;
 
-  if (current !== storedPass) { showToast('Current password is incorrect.', 'error'); return; }
-  if (newPass.length < 8)     { showToast('New password must be at least 8 characters.', 'error'); return; }
-  if (newPass !== confirm)     { showToast('New passwords do not match.', 'error'); return; }
+  if (newPass.length < 8)  { showToast('New password must be at least 8 characters.', 'error'); return; }
+  if (newPass !== confirm) { showToast('New passwords do not match.', 'error'); return; }
 
-  s.adminPass = newPass;
-  setObj(KEYS.settings, s);
+  const { error } = await supabaseClient.auth.updateUser({ password: newPass });
+
+  if (error) {
+    showToast('Could not change password: ' + error.message, 'error');
+    return;
+  }
+
   logActivity('Admin password changed');
   showToast('Password changed successfully!', 'success');
-  document.getElementById('pass-current').value = '';
   document.getElementById('pass-new').value = '';
   document.getElementById('pass-confirm').value = '';
 }
