@@ -44,21 +44,19 @@ function timeAgo(iso) {
 ══════════════════════════════ */
 async function initLogin() {
 
+  /* Force these hidden at load, bypassing any HTML/CSS ambiguity */
+  document.getElementById('forgot-overlay').style.display = 'none';
+  document.getElementById('reset-overlay').style.display = 'none';
+
   /* If this page was opened from a password-reset email link, Supabase
      puts the recovery info in the URL and fires a PASSWORD_RECOVERY event. */
   supabaseClient.auth.onAuthStateChange((event) => {
     if (event === 'PASSWORD_RECOVERY') {
       document.getElementById('login-overlay').classList.add('hidden');
-      document.getElementById('reset-overlay').classList.remove('hidden');
+      document.getElementById('forgot-overlay').style.display = 'none';
+      document.getElementById('reset-overlay').style.display = 'flex';
     }
   });
-
-  /* Check existing session */
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session) {
-    showDashboard();
-    return;
-  }
 
   document.getElementById('login-form').addEventListener('submit', async function (e) {
     e.preventDefault();
@@ -90,12 +88,12 @@ async function initLogin() {
   document.getElementById('forgot-pass-link').addEventListener('click', function (e) {
     e.preventDefault();
     document.getElementById('login-overlay').classList.add('hidden');
-    document.getElementById('forgot-overlay').classList.remove('hidden');
+    document.getElementById('forgot-overlay').style.display = 'flex';
   });
 
   document.getElementById('back-to-login-link').addEventListener('click', function (e) {
     e.preventDefault();
-    document.getElementById('forgot-overlay').classList.add('hidden');
+    document.getElementById('forgot-overlay').style.display = 'none';
     document.getElementById('login-overlay').classList.remove('hidden');
   });
 
@@ -144,16 +142,27 @@ async function initLogin() {
       err.textContent = 'Could not update password. Please try the reset link again.';
       err.classList.add('show');
     } else {
-      document.getElementById('reset-overlay').classList.add('hidden');
+      document.getElementById('reset-overlay').style.display = 'none';
       showDashboard();
     }
   });
+
+  /* Now that every button/form is wired up, check for an existing session.
+     Skip this if we're in the middle of a password-recovery link, so the
+     PASSWORD_RECOVERY handler above stays in control of the screen. */
+  const isRecoveryLink = window.location.hash.includes('type=recovery');
+  if (!isRecoveryLink) {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+      showDashboard();
+    }
+  }
 }
 
 function showDashboard() {
   document.getElementById('login-overlay').classList.add('hidden');
-  document.getElementById('forgot-overlay').classList.add('hidden');
-  document.getElementById('reset-overlay').classList.add('hidden');
+  document.getElementById('forgot-overlay').style.display = 'none';
+  document.getElementById('reset-overlay').style.display = 'none';
   const dash = document.getElementById('dashboard');
   dash.classList.add('visible');
   initDashboard();
