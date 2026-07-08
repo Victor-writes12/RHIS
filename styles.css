@@ -74,7 +74,7 @@ nav.scrolled{background:rgba(11,30,62,.97);box-shadow:0 4px 32px rgba(0,0,0,.2);
 .hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;
   opacity:0;transition:opacity .8s ease;}
 .hero-slide.active{opacity:1;}
-.carousel-control{position:absolute;top:50%;transform:translateY(-50%);width:62px;height:62px;border-radius:50%;
+.carousel-control{position:absolute;top:50%;transform:translateY(-50%);width:45px;height:45px;border-radius:50%;
   border:1.5px solid rgba(255,255,255,.55);background:rgba(11,30,62,.45);
   backdrop-filter:blur(18px);display:flex;align-items:center;justify-content:center;
   color:#fff;font-size:26px;cursor:pointer;z-index:5;transition:transform .2s,background .2s,box-shadow .2s;}
