@@ -813,7 +813,7 @@ footer strong{color:var(--gold-lt);}
 .vv-value:hover{transform:translateY(-6px);background:rgba(255,255,255,.09);}
 .vv-icon{width:56px;height:56px;border-radius:50%;background:rgba(214,166,56,.15);
   display:flex;align-items:center;justify-content:center;margin:0 auto 18px;
-  font-size:22px;color:var(--gold-lt);}
+  font-size:22px;color:#fff;}
 .vv-value h3{font-family:'Playfair Display',serif;font-size:19px;color:#fff;margin-bottom:10px;}
 .vv-value p{font-size:14px;color:rgba(255,255,255,.65);line-height:1.7;}
 
