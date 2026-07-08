@@ -785,3 +785,48 @@ footer strong{color:var(--gold-lt);}
   .sp-hero-grid{grid-template-columns:1fr;gap:32px;max-width:480px;}
   .sp-hero-img .ev-slider{height:240px;}
 }
+
+/* ===VISION & VALUES PAGE=== */
+#vv-hero{position:relative;min-height:60vh;display:flex;align-items:center;
+  background-size:cover;background-position:center;overflow:hidden;}
+.vv-hero-ov{position:absolute;inset:0;
+  background:linear-gradient(100deg,rgba(11,30,62,.92) 0%,rgba(11,30,62,.55) 55%,rgba(11,30,62,.25) 100%);}
+.vv-hero-content{position:relative;z-index:1;padding:140px 60px 60px;max-width:640px;}
+.vv-hero-content h1{font-family:'Playfair Display',serif;font-weight:900;color:#fff;
+  font-size:clamp(34px,5vw,56px);margin:12px 0 18px;line-height:1.15;}
+.vv-hero-content p{color:rgba(255,255,255,.82);font-size:16px;line-height:1.8;}
+
+#vv-vision{background:var(--cream);padding:90px 60px;}
+.vv-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;max-width:1100px;margin:0 auto;}
+.vv-text .eyebrow{display:block;margin-bottom:10px;}
+.vv-text h2{font-family:'Playfair Display',serif;font-weight:700;color:var(--navy);
+  font-size:26px;margin-bottom:16px;}
+.vv-text p{font-size:15px;color:var(--body);line-height:1.85;}
+
+#vv-values{background:var(--navy);text-align:center;padding:90px 60px;position:relative;overflow:hidden;}
+#vv-values::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 70% 20%,rgba(214,166,56,.12),transparent 60%);}
+.vv-values-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;
+  max-width:1100px;margin:44px auto 0;position:relative;z-index:1;}
+.vv-value{background:rgba(255,255,255,.05);border:1px solid rgba(200,153,42,.2);
+  border-radius:20px;padding:36px 24px;transition:transform .3s,background .2s;}
+.vv-value:hover{transform:translateY(-6px);background:rgba(255,255,255,.09);}
+.vv-icon{width:56px;height:56px;border-radius:50%;background:rgba(214,166,56,.15);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 18px;
+  font-size:22px;color:var(--gold-lt);}
+.vv-value h3{font-family:'Playfair Display',serif;font-size:19px;color:#fff;margin-bottom:10px;}
+.vv-value p{font-size:14px;color:rgba(255,255,255,.65);line-height:1.7;}
+
+#vv-motto{background:var(--cream);text-align:center;padding:70px 40px;}
+#vv-motto p{font-family:'Playfair Display',serif;font-style:italic;font-weight:700;
+  color:var(--navy);font-size:clamp(22px,3.5vw,32px);max-width:700px;margin:0 auto;}
+
+@media(max-width:900px){
+  .vv-hero-content{padding:130px 24px 50px;}
+  .vv-grid{grid-template-columns:1fr;gap:36px;}
+  #vv-vision,#vv-values{padding:60px 24px;}
+  .vv-values-grid{grid-template-columns:1fr 1fr;gap:18px;}
+}
+@media(max-width:560px){
+  .vv-values-grid{grid-template-columns:1fr;}
+}
