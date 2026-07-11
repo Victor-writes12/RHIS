@@ -226,18 +226,17 @@ function initSidebar() {
 /* ══════════════════════════════
    SECTION 1 — OVERVIEW
 ══════════════════════════════ */
-function renderOverview() {
-  const posts = get(KEYS.posts);
+async function renderOverview() {
+  const { data: posts } = await supabaseClient.from('posts').select('status');
   const anns = get(KEYS.announcements);
-  const published = posts.filter(p => p.status === 'published').length;
-  const drafts = posts.filter(p => p.status === 'draft').length;
+  const publishedCount = (posts || []).filter(p => p.status === 'published').length;
+  const draftsCount = (posts || []).filter(p => p.status === 'draft').length;
 
-  document.getElementById('stat-total').textContent = posts.length;
-  document.getElementById('stat-published').textContent = published;
-  document.getElementById('stat-drafts').textContent = drafts;
+  document.getElementById('stat-total').textContent = (posts || []).length;
+  document.getElementById('stat-published').textContent = publishedCount;
+  document.getElementById('stat-drafts').textContent = draftsCount;
   document.getElementById('stat-anns').textContent = anns.length;
 
-  // Activity feed
   const logs = get(KEYS.activity);
   const list = document.getElementById('activity-list');
   if (logs.length === 0) {
@@ -256,24 +255,259 @@ function renderOverview() {
    SECTION 2 — POSTS
 ══════════════════════════════ */
 let editingPostId = null;
+let editingPostMediaUrl = null;
+let editingPostMediaType = null;
 
 function initPostForm() {
-  // Auto-fill date
   document.getElementById('post-date').value = new Date().toISOString().split('T')[0];
 
-  // Image preview
   document.getElementById('post-image').addEventListener('change', function () {
     const file = this.files[0];
     if (!file) return;
+    const isVideo = file.type.startsWith('video/');
     const reader = new FileReader();
     reader.onload = e => {
-      document.getElementById('img-preview').src = e.target.result;
+      const imgEl = document.getElementById('img-preview');
+      const vidEl = document.getElementById('video-preview');
+      if (isVideo) {
+        vidEl.src = e.target.result;
+        vidEl.style.display = 'block';
+        imgEl.style.display = 'none';
+      } else {
+        imgEl.src = e.target.result;
+        imgEl.style.display = 'block';
+        vidEl.style.display = 'none';
+        vidEl.src = '';
+      }
       document.getElementById('img-preview-wrap').style.display = 'block';
     };
     reader.readAsDataURL(file);
   });
 }
 
+async function savePost() {
+  const title = document.getElementById('post-title').value.trim();
+  const category = document.getElementById('post-category').value;
+  const date = document.getElementById('post-date').value;
+  const body = document.getElementById('post-body').innerHTML.trim();
+  const status = document.getElementById('post-status').checked ? 'published' : 'draft';
+  const file = document.getElementById('post-image').files[0];
+
+  let valid = true;
+  if (!title) { showFieldErr('post-title', 'Title is required'); valid = false; }
+  if (!category) { showFieldErr('post-category', 'Select a category'); valid = false; }
+  if (!date) { showFieldErr('post-date', 'Date is required'); valid = false; }
+  if (!body || body === '') { showToast('Post body cannot be empty', 'error'); valid = false; }
+  if (!valid) return;
+
+  const saveBtn = document.querySelector('.form-actions .btn-navy');
+  const originalBtnHTML = saveBtn.innerHTML;
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+  const excerpt = body.replace(/<[^>]+>/g, '').substring(0, 150) + '...';
+
+  let media_url = editingPostMediaUrl || null;
+  let media_type = editingPostMediaType || null;
+
+  if (file) {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${fileExt}`;
+
+    const { error: uploadError } = await supabaseClient.storage.from('Post Media').upload(fileName, file);
+
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      showToast('Could not upload file: ' + uploadError.message, 'error');
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = originalBtnHTML;
+      return;
+    }
+
+    const { data: urlData } = supabaseClient.storage.from('Post Media').getPublicUrl(fileName);
+    media_url = urlData.publicUrl;
+    media_type = file.type.startsWith('video/') ? 'video' : 'image';
+  }
+
+  if (editingPostId) {
+    const { error } = await supabaseClient
+      .from('posts')
+      .update({ title, category, post_date: date, body, excerpt, status, media_url, media_type, updated_at: new Date().toISOString() })
+      .eq('id', editingPostId);
+
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = originalBtnHTML;
+
+    if (error) {
+      console.error('Update error:', error);
+      showToast('Could not update post: ' + error.message, 'error');
+      return;
+    }
+    logActivity(`Post updated: "${title}"`);
+    showToast('Post updated successfully!', 'success');
+    editingPostId = null;
+    document.querySelector('.form-edit-indicator')?.remove();
+  } else {
+    const { error } = await supabaseClient
+      .from('posts')
+      .insert([{ title, category, post_date: date, body, excerpt, status, media_url, media_type }]);
+
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = originalBtnHTML;
+
+    if (error) {
+      console.error('Insert error:', error);
+      showToast('Could not save post: ' + error.message, 'error');
+      return;
+    }
+    logActivity(`New post created: "${title}"`);
+    showToast('Post saved successfully!', 'success');
+  }
+
+  clearPostForm();
+  renderPostsTable();
+  renderOverview();
+}
+
+function clearPostForm() {
+  document.getElementById('post-title').value = '';
+  document.getElementById('post-category').value = '';
+  document.getElementById('post-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('post-body').innerHTML = '';
+  document.getElementById('post-status').checked = true;
+  document.getElementById('img-preview-wrap').style.display = 'none';
+  document.getElementById('img-preview').src = '';
+  document.getElementById('img-preview').style.display = 'block';
+  document.getElementById('video-preview').src = '';
+  document.getElementById('video-preview').style.display = 'none';
+  document.getElementById('post-image').value = '';
+  editingPostId = null;
+  editingPostMediaUrl = null;
+  editingPostMediaType = null;
+  document.querySelector('.form-edit-indicator')?.remove();
+  clearFieldErrs();
+}
+
+async function editPost(id) {
+  const { data: post, error } = await supabaseClient.from('posts').select('*').eq('id', id).single();
+
+  if (error || !post) {
+    console.error('Fetch post error:', error);
+    showToast('Could not load post for editing.', 'error');
+    return;
+  }
+
+  switchSection('posts');
+  editingPostId = id;
+  editingPostMediaUrl = post.media_url;
+  editingPostMediaType = post.media_type;
+
+  document.getElementById('post-title').value = post.title;
+  document.getElementById('post-category').value = post.category;
+  document.getElementById('post-date').value = post.post_date;
+  document.getElementById('post-body').innerHTML = post.body;
+  document.getElementById('post-status').checked = post.status === 'published';
+
+  const imgEl = document.getElementById('img-preview');
+  const vidEl = document.getElementById('video-preview');
+  if (post.media_url) {
+    if (post.media_type === 'video') {
+      vidEl.src = post.media_url;
+      vidEl.style.display = 'block';
+      imgEl.style.display = 'none';
+    } else {
+      imgEl.src = post.media_url;
+      imgEl.style.display = 'block';
+      vidEl.style.display = 'none';
+    }
+    document.getElementById('img-preview-wrap').style.display = 'block';
+  }
+
+  document.querySelector('.form-edit-indicator')?.remove();
+  const ind = document.createElement('div');
+  ind.className = 'form-edit-indicator';
+  ind.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Editing: <strong>${post.title}</strong> <button onclick="clearPostForm()" class="btn btn-sm btn-outline" style="margin-left:10px">Cancel Edit</button>`;
+  ind.style.cssText = 'background:rgba(180,137,42,.1);border:1px solid rgba(180,137,42,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--navy);display:flex;align-items:center;gap:8px;margin-bottom:16px;';
+  document.getElementById('post-form-card').prepend(ind);
+  document.getElementById('post-form-card').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function deletePost(id) {
+  if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
+
+  const { data: post } = await supabaseClient.from('posts').select('title').eq('id', id).single();
+  const { error } = await supabaseClient.from('posts').delete().eq('id', id);
+
+  if (error) {
+    console.error('Delete post error:', error);
+    showToast('Could not delete post: ' + error.message, 'error');
+    return;
+  }
+
+  if (post) logActivity(`Post deleted: "${post.title}"`);
+  renderPostsTable();
+  renderOverview();
+  showToast('Post deleted.', 'success');
+}
+
+async function togglePostStatus(id) {
+  const { data: post, error: fetchError } = await supabaseClient.from('posts').select('status, title').eq('id', id).single();
+  if (fetchError || !post) return;
+
+  const newStatus = post.status === 'published' ? 'draft' : 'published';
+  const { error } = await supabaseClient.from('posts').update({ status: newStatus }).eq('id', id);
+
+  if (error) {
+    console.error('Toggle status error:', error);
+    showToast('Could not update status: ' + error.message, 'error');
+    return;
+  }
+
+  logActivity(`Post "${post.title}" set to ${newStatus}`);
+  renderPostsTable();
+  renderOverview();
+}
+
+async function renderPostsTable(filter = '') {
+  const tbody = document.getElementById('posts-tbody');
+  const { data: posts, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Fetch posts error:', error);
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><p>Could not load posts.</p></div></td></tr>`;
+    return;
+  }
+
+  let filtered = posts || [];
+  if (filter) {
+    const q = filter.toLowerCase();
+    filtered = filtered.filter(p => p.title.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5">
+      <div class="empty-state">
+        <i class="fa-solid fa-newspaper"></i>
+        <p>${filter ? 'No posts match your search.' : 'No posts yet. Create your first post above!'}</p>
+      </div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(p => `
+    <tr>
+      <td><strong style="color:var(--navy)">${p.title}</strong></td>
+      <td><span class="badge badge-${p.category}">${p.category}</span></td>
+      <td>${formatDate(p.post_date)}</td>
+      <td><span class="badge badge-${p.status}">${p.status}</span></td>
+      <td>
+        <div class="actions">
+          <button class="btn btn-sm btn-outline" onclick="editPost('${p.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-sm btn-navy" onclick="togglePostStatus('${p.id}')" title="Toggle status"><i class="fa-solid fa-rotate"></i></button>
+          <button class="btn btn-sm btn-danger" onclick="deletePost('${p.id}')"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
 function savePost() {
   const title = document.getElementById('post-title').value.trim();
   const category = document.getElementById('post-category').value;
